@@ -77,7 +77,7 @@ class App:
             await self._session.close()
 
             # Cleanup curl_cffi session (for CloudFront WAF bypass)
-            from cognito_auth import cleanup_curl_session
+            from src.cognito_auth import cleanup_curl_session
             await cleanup_curl_session()
 
     @property
@@ -113,7 +113,7 @@ class App:
 
         # Update active sessions metric
         try:
-            import metrics
+            from src import metrics
             metrics.update_active_sessions(len(self._user_sessions))
         except (ImportError, AttributeError):
             pass
@@ -130,7 +130,7 @@ class App:
 
             # Update active sessions metric
             try:
-                import metrics
+                from src import metrics
                 metrics.update_active_sessions(len(self._user_sessions))
             except (ImportError, AttributeError):
                 pass
@@ -144,7 +144,7 @@ class App:
 
         # Update active sessions metric
         try:
-            import metrics
+            from src import metrics
             metrics.update_active_sessions(0)
         except (ImportError, AttributeError):
             pass
