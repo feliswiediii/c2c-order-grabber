@@ -58,6 +58,13 @@ class OrderMonitor:
                 await self._poll()
                 latency = time.monotonic() - start
 
+                # Update health check activity
+                try:
+                    import main
+                    main.update_health_check_activity()
+                except (ImportError, AttributeError):
+                    pass  # Health check not available
+
                 # Track latency
                 self._latencies.append(latency)
                 logger.debug("Poll latency: %.1fms", latency * 1000)
