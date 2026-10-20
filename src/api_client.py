@@ -100,7 +100,7 @@ class ApiClient:
 
                     # Record API request metrics
                     try:
-                        import metrics
+                        from src import metrics
                         status_class = f"{resp.status // 100}xx"
                         metrics.record_api_request(path, method, status_class)
                     except (ImportError, AttributeError):
@@ -139,7 +139,7 @@ class ApiClient:
 
                 # Record network error metric
                 try:
-                    import metrics
+                    from src import metrics
                     metrics.record_api_request(path, method, "error")
                 except (ImportError, AttributeError):
                     pass
