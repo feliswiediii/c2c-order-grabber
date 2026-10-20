@@ -246,17 +246,6 @@ Result: `https://c2c-order-grabber.xxxxx.eu-north-1.cs.amazonlightsail.com`
 
 Open in browser, login: `admin` / `admin` - **Change password immediately!**
 
-### Cost
-
-| Size | vCPU | RAM | Price/month | Recommendation |
-|------|------|-----|-------------|----------------|
-| micro | 0.25 | 512MB | $7 | Too small (OOM) |
-| **small** | 0.5 | **1GB** | **$10** | **Optimal** |
-| medium | 1.0 | 2GB | $20 | Comfortable (many users) |
-| large | 2.0 | 4GB | $40 | Excessive |
-
-**Footprint:** ~250-330MB RAM - fits in small with room.
-
 ## Architecture
 
 ### Producer-Consumer Pattern
@@ -320,32 +309,6 @@ c2c-order-grabber/
 ├── Dockerfile.production # Production all-in-one
 ├── docker-compose.yml   # Local stack
 └── requirements.txt     # Dependencies
-```
-
-## Benchmark Tools
-
-### RTT Measurement from Different AWS Regions
-
-Used to select optimal deployment region:
-
-```bash
-cd benchmark
-./deploy_benchmark.sh
-```
-
-Automatically:
-1. Deploys containers to 7 AWS regions
-2. Measures DNS, TCP, TLS, HTTP latency
-3. Generates comparison table
-4. Recommends best region
-
-**Example output:**
-```
-Region                RTT (ms)   TCP (ms)   TLS (ms)  HTTP (ms)
---------------------------------------------------------------
-us-east-1                4.2ms      4.3ms      9.1ms     15.7ms  <- BEST
-eu-west-1               92.3ms     93.7ms    185.1ms    241.8ms
-eu-north-1             118.4ms    119.1ms    234.7ms    298.2ms
 ```
 
 ## Security
