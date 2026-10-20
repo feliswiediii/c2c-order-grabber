@@ -79,9 +79,6 @@ COPY monitoring/grafana/dashboards/c2c-bot-dashboard.json /var/lib/grafana/dashb
 # Update Grafana datasource to point to localhost
 RUN sed -i 's|http://prometheus:9090|http://localhost:9091|g' /etc/grafana/provisioning/datasources/prometheus.yml
 
-# Update Prometheus config to scrape localhost
-RUN sed -i "s|bot:9090|localhost:9090|g" /etc/prometheus/prometheus.yml
-
 # Create Grafana config
 RUN echo '[paths]\n\
 data = /var/lib/grafana\n\

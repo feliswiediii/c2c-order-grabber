@@ -5,7 +5,7 @@ global:
   evaluation_interval: 15s  # How frequently to evaluate rules
   scrape_timeout: 10s
 
-# Alertmanager configuration (optional, for future alerts)
+# Alertmanager configuration
 # alerting:
 #   alertmanagers:
 #     - static_configs:
@@ -17,11 +17,11 @@ scrape_configs:
   # Scrape Prometheus itself
   - job_name: 'prometheus'
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ['localhost:9091']
 
   # Scrape C2C Order Grabber Bot metrics
   - job_name: 'c2c-bot'
     static_configs:
-      - targets: ['bot:9090']
+      - targets: ['localhost:9090']
     metrics_path: '/metrics'
     scrape_interval: 5s  # More frequent for real-time monitoring
