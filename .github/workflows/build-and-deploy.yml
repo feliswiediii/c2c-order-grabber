@@ -115,8 +115,8 @@ jobs:
               "unhealthyThreshold": 2,
               "timeoutSeconds": 5,
               "intervalSeconds": 30,
-              "path": "/api/health",
-              "successCodes": "200"
+              "path": "/",
+              "successCodes": "200-399"
             }
           }
           EOF
