@@ -152,8 +152,8 @@ async def auth_trader_id(message: Message, state: FSMContext, app: App) -> None:
     # NOTE: Don't load old tokens during manual re-authentication
     # User explicitly asked to log in, so we should get fresh tokens with password + MFA
     # Old tokens will be overwritten with new ones after successful auth
-    from db.engine import get_session as get_db_session
-    from db.repository import AuthorizedUserRepository
+    from src.db.engine import get_session as get_db_session
+    from src.db.repository import AuthorizedUserRepository
 
     # Create MFA callback if needed
     mfa_event = asyncio.Event()
@@ -275,9 +275,9 @@ async def invite_code_start(callback: CallbackQuery, state: FSMContext) -> None:
 @router.message(InviteCodeFSM.waiting_code)
 async def invite_code_check(message: Message, state: FSMContext, app: App) -> None:
     """Check invite code."""
-    import config
-    from db.engine import get_session
-    from db.repository import AuthorizedUserRepository
+    from src import config
+    from src.db.engine import get_session
+    from src.db.repository import AuthorizedUserRepository
 
     code = message.text.strip()
     chat_id = message.chat.id

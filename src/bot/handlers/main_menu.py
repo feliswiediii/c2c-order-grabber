@@ -53,10 +53,10 @@ async def main_menu(callback: CallbackQuery, app) -> None:
 
 @router.message(CommandStart())
 async def cmd_start(message: Message, app) -> None:
-    import config
+    from src import config
     from aiogram.utils.keyboard import InlineKeyboardBuilder
-    from db.engine import get_session
-    from db.repository import AuthorizedUserRepository
+    from src.db.engine import get_session
+    from src.db.repository import AuthorizedUserRepository
 
     chat_id = message.chat.id
 
