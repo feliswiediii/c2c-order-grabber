@@ -1,173 +1,173 @@
 # C2C Order Grabber Bot
 
-Telegram-бот для автоматического мониторинга и захвата ордеров на платформе Cards2Cards с AWS Cognito авторизацией.
+Telegram bot for automated monitoring and grabbing orders on Cards2Cards platform with AWS Cognito authentication.
 
-> Fork оригинального проекта [Ps1nu5/c2c-order-grabber](https://github.com/Ps1nu5/c2c-order-grabber) с улучшениями производительности, мониторингом и автоматическим деплоем в AWS Lightsail.
+> Fork of original project [Ps1nu5/c2c-order-grabber](https://github.com/Ps1nu5/c2c-order-grabber) with performance improvements, monitoring, and automated AWS Lightsail deployment.
 
-## ⚡ Основные возможности
+## Core Features
 
-### Функциональность
-- ✅ Мониторинг новых заказов в реальном времени
-- ✅ Настраиваемые фильтры по сумме (мин/макс)
-- ✅ Автоматическая AWS Cognito авторизация с MFA
-- ✅ Поддержка прокси для обхода IP-блокировок
-- ✅ SQLite база данных для настроек и логов
-- ✅ Обход CloudFront WAF через curl_cffi
-- ✅ Уведомления о взятых и пропущенных заказах
+### Functionality
+- Real-time order monitoring
+- Configurable amount filters (min/max)
+- Automated AWS Cognito authentication with MFA
+- Proxy support for IP blocking bypass
+- SQLite database for settings and logs
+- CloudFront WAF bypass via curl_cffi
+- Notifications for grabbed and missed orders
 
-### Производительность и надёжность
-- ⚡ **Оптимизация латентности:**
-  - Переиспользование HTTP-соединений (Keep-Alive 30s)
-  - DNS кеширование (10 минут)
-  - TCP_NODELAY для минимальной задержки
-  - Connection pooling (до 20 соединений)
+### Performance and Reliability
+- **Latency optimization:**
+  - HTTP connection reuse (Keep-Alive 30s)
+  - DNS caching (10 minutes)
+  - TCP_NODELAY for minimal delay
+  - Connection pooling (up to 20 connections)
 
-- 🔄 **Адаптивный polling:**
-  - Базовый интервал: 0.5 секунды (с jitter ±20%)
-  - Автоматическое удвоение при rate limit (429)
-  - Плавное восстановление (95% × интервал)
-  - Cap 5 секунд для защиты API
+- **Adaptive polling:**
+  - Base interval: 0.5 seconds (with jitter ±20%)
+  - Automatic doubling on rate limit (429)
+  - Gradual recovery (95% × interval)
+  - 5 second cap for API protection
 
-- 🛡️ **Надёжность:**
-  - Idempotency-Key для предотвращения дублей при таймаутах
-  - Retry логика: 3 попытки с linear backoff (0.3s × attempt)
-  - Docker HEALTHCHECK (проверка каждые 30s)
-  - Автоматический перезапуск при падении
+- **Reliability:**
+  - Idempotency-Key to prevent duplicates on timeouts
+  - Retry logic: 3 attempts with linear backoff (0.3s × attempt)
+  - Docker HEALTHCHECK (every 30s)
+  - Automatic restart on failure
 
-### Мониторинг (Prometheus + Grafana)
-- 📊 **Comprehensive dashboard** с 10 панелями:
+### Monitoring (Prometheus + Grafana)
+- **Comprehensive dashboard** with 10 panels:
   - Active Sessions, Orders Seen Rate, Success Rate
   - Poll Latency (p50/p95/p99), Order Outcomes
-  - Time to Grab (detection → success), Queue Depth
+  - Time to Grab (detection to success), Queue Depth
   - Rate Limits, API Requests breakdown
 
-- 📈 **Метрики:**
+- **Metrics:**
   - **Counters:** orders_seen/taken/failed, api_requests, poll_cycles, rate_limits
   - **Gauges:** active_sessions, queue_depth, current_poll_interval
   - **Histograms:** poll_duration, order_grab_duration, time_to_grab
 
-- 🔍 **Production-ready:**
-  - All-in-one контейнер (Bot + Prometheus + Grafana)
-  - История метрик 7 дней
-  - HTTPS доступ к Grafana из любой точки мира
-  - ~250-300MB RAM (влезает в Lightsail small $10/мес)
+- **Production-ready:**
+  - All-in-one container (Bot + Prometheus + Grafana)
+  - 7 day metrics retention
+  - HTTPS access to Grafana from anywhere
+  - ~250-300MB RAM (fits in Lightsail small $10/month)
 
-## 📋 Требования
+## Requirements
 
 - Python 3.10+
-- Telegram Bot Token (получить у [@BotFather](https://t.me/botfather))
-- Учётные данные Cards2Cards
+- Telegram Bot Token (get from [@BotFather](https://t.me/botfather))
+- Cards2Cards credentials
 
-## 🚀 Локальная установка
+## Local Installation
 
-### 1. Клонировать репозиторий
+### 1. Clone repository
 
 ```bash
 git clone https://github.com/DASHULYA1337/c2c-order-grabber.git
 cd c2c-order-grabber
 ```
 
-### 2. Создать виртуальное окружение
+### 2. Create virtual environment
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 ```
 
-### 3. Установить зависимости
+### 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Настроить переменные окружения
+### 4. Configure environment variables
 
-Скопировать `.env.example` в `.env` и настроить:
+Copy `.env.example` to `.env` and configure:
 
 ```bash
 cp .env.example .env
 ```
 
-Отредактировать `.env`:
+Edit `.env`:
 
 ```env
-# Обязательно
+# Required
 TELEGRAM_BOT_TOKEN=your_bot_token_here
 ADMIN_CHAT_ID=your_telegram_chat_id_here
 
-# Опционально: код-приглашение для контроля доступа
+# Optional: invite code for access control
 INVITE_CODE=your_secret_invite_code
 
-# AWS Cognito (можно оставить как есть)
+# AWS Cognito (can leave as is)
 AWS_REGION=us-east-1
 COGNITO_CLIENT_ID=6eio0hlq4tmr2o9d30ht9cvfn7
 COGNITO_USER_POOL_ID=us-east-1_9szPtqd8w
 COGNITO_IDENTITY_POOL_ID=us-east-1:db254d71-fe90-4631-bee5-d7ed0a489588
 ```
 
-### 5. Запустить бота
+### 5. Run bot
 
 ```bash
 python main.py
 ```
 
-## 🎯 Использование
+## Usage
 
-1. Запустить бота командой `/start` в Telegram
-2. Ввести invite code (если настроен)
-3. Ввести учётные данные Cards2Cards
-4. Настроить фильтры по сумме (опционально)
-5. Начать мониторинг
+1. Start bot with `/start` command in Telegram
+2. Enter invite code (if configured)
+3. Enter Cards2Cards credentials
+4. Configure amount filters (optional)
+5. Start monitoring
 
-### Команды бота
+### Bot Commands
 
-- `/start` - Запустить бота / авторизоваться
-- `/stop` - Остановить мониторинг
-- `/settings` - Настроить фильтры
-- `/status` - Посмотреть статистику
+- `/start` - Start bot / authenticate
+- `/stop` - Stop monitoring
+- `/settings` - Configure filters
+- `/status` - View statistics
 
-## ⚙️ Конфигурация
+## Configuration
 
-### Переменные окружения
+### Environment Variables
 
-| Переменная | Обязательна | Описание | По умолчанию |
-|------------|-------------|----------|--------------|
-| `TELEGRAM_BOT_TOKEN` | Да | Telegram bot token | - |
-| `ADMIN_CHAT_ID` | Да | ID чата администратора | - |
-| `INVITE_CODE` | Нет | Код-приглашение | - |
-| `AWS_REGION` | Нет | AWS регион | `us-east-1` |
-| `DATABASE_URL` | Нет | URL базы данных | `sqlite+aiosqlite:///./data/bot.db` |
-| `LOG_FILE` | Нет | Путь к лог-файлу | `bot.log` |
-| `POLL_INTERVAL_S` | Нет | Интервал опроса (секунды) | `0.5` |
-| `DEBUG` | Нет | Режим отладки | `false` |
-| `HTTP_PROXY` | Нет | HTTP прокси | - |
-| `HTTPS_PROXY` | Нет | HTTPS прокси | - |
+| Variable | Required | Description | Default |
+|----------|----------|-------------|---------|
+| `TELEGRAM_BOT_TOKEN` | Yes | Telegram bot token | - |
+| `ADMIN_CHAT_ID` | Yes | Admin chat ID | - |
+| `INVITE_CODE` | No | Invite code | - |
+| `AWS_REGION` | No | AWS region | `us-east-1` |
+| `DATABASE_URL` | No | Database URL | `sqlite+aiosqlite:///./data/bot.db` |
+| `LOG_FILE` | No | Log file path | `bot.log` |
+| `POLL_INTERVAL_S` | No | Poll interval (seconds) | `0.5` |
+| `DEBUG` | No | Debug mode | `false` |
+| `HTTP_PROXY` | No | HTTP proxy | - |
+| `HTTPS_PROXY` | No | HTTPS proxy | - |
 
-### Настройка прокси
+### Proxy Configuration
 
-Для обхода блокировок по IP настройте прокси:
+To bypass IP blocks configure proxy:
 
 ```env
 HTTP_PROXY=http://proxy.example.com:8080
 HTTPS_PROXY=http://proxy.example.com:8080
-# Поддерживаются SOCKS5 прокси
+# SOCKS5 proxies supported
 ```
 
-## 🐳 Docker (локальная разработка с мониторингом)
+## Docker (local development with monitoring)
 
-### Запуск всего стека (Bot + Prometheus + Grafana)
+### Run full stack (Bot + Prometheus + Grafana)
 
 ```bash
 docker-compose up -d
 ```
 
-**Доступ к сервисам:**
+**Service access:**
 - Bot health check: http://localhost:8080/health
 - Bot metrics: http://localhost:9090/metrics
 - Prometheus UI: http://localhost:9091
-- **Grafana Dashboard: http://localhost:3000** (admin/admin)
+- Grafana Dashboard: http://localhost:3000 (admin/admin)
 
-### Просмотр логов
+### View logs
 
 ```bash
 docker-compose logs -f bot
@@ -175,44 +175,44 @@ docker-compose logs -f prometheus
 docker-compose logs -f grafana
 ```
 
-### Остановка
+### Stop
 
 ```bash
 docker-compose down
 ```
 
-## ☁️ Production деплой (AWS Lightsail)
+## Production Deployment (AWS Lightsail)
 
-Автоматический деплой с Terraform и GitHub Actions.
+Automated deployment with Terraform and GitHub Actions.
 
-### Что деплоится
+### What gets deployed
 
-**All-in-one контейнер** (`Dockerfile.production`):
-- Bot (Python app) - порты 8080 (health), 9090 (metrics)
-- Prometheus - порт 9091 (scraping метрик, retention 7 дней)
-- Grafana - порт 3000 (HTTPS публичный доступ)
+**All-in-one container** (`Dockerfile.production`):
+- Bot (Python app) - ports 8080 (health), 9090 (metrics)
+- Prometheus - port 9091 (scraping metrics, 7 day retention)
+- Grafana - port 3000 (HTTPS public access)
 
-Всё управляется через **supervisord** - автоматический перезапуск при падении.
+Everything managed via **supervisord** - automatic restart on failure.
 
-### Быстрый старт
+### Quick Start
 
-#### 1. Настроить GitHub Secrets
+#### 1. Configure GitHub Secrets
 
-В Settings → Secrets and variables → Actions добавить:
+In Settings → Secrets and variables → Actions add:
 
 ```
 AWS_ACCESS_KEY_ID          # AWS credentials
 AWS_SECRET_ACCESS_KEY      # AWS credentials
-TELEGRAM_BOT_TOKEN         # Токен бота
-ADMIN_CHAT_ID              # ID чата админа
-INVITE_CODE                # (опционально)
+TELEGRAM_BOT_TOKEN         # Bot token
+ADMIN_CHAT_ID              # Admin chat ID
+INVITE_CODE                # (optional)
 DOCKERHUB_USERNAME         # Docker Hub username
 DOCKERHUB_TOKEN            # Docker Hub token
-HTTP_PROXY                 # (опционально)
-HTTPS_PROXY                # (опционально)
+HTTP_PROXY                 # (optional)
+HTTPS_PROXY                # (optional)
 ```
 
-#### 2. Задеплоить инфраструктуру
+#### 2. Deploy infrastructure
 
 ```bash
 cd deploy/terraform
@@ -220,19 +220,19 @@ terraform init
 terraform apply
 ```
 
-#### 3. Автоматический деплой
+#### 3. Automatic deployment
 
 ```bash
 git push origin main
 ```
 
-GitHub Actions автоматически:
-- Соберёт production image
-- Push в Docker Hub
-- Задеплоит в AWS Lightsail
-- Expose Grafana на HTTPS
+GitHub Actions automatically:
+- Builds production image
+- Pushes to Docker Hub
+- Deploys to AWS Lightsail
+- Exposes Grafana on HTTPS
 
-#### 4. Получить URL Grafana
+#### 4. Get Grafana URL
 
 ```bash
 aws lightsail get-container-services \
@@ -242,131 +242,131 @@ aws lightsail get-container-services \
   --output text
 ```
 
-Результат: `https://c2c-order-grabber.xxxxx.eu-north-1.cs.amazonlightsail.com`
+Result: `https://c2c-order-grabber.xxxxx.eu-north-1.cs.amazonlightsail.com`
 
-Открыть в браузере, логин: `admin` / `admin` ⚠️ **Сменить пароль сразу!**
+Open in browser, login: `admin` / `admin` - **Change password immediately!**
 
-### Стоимость
+### Cost
 
-| Размер | vCPU | RAM | Цена/мес | Рекомендация |
-|--------|------|-----|----------|--------------|
-| micro | 0.25 | 512MB | $7 | ❌ Мало (OOM) |
-| **small** | 0.5 | **1GB** | **$10** | ✅ **Оптимально** |
-| medium | 1.0 | 2GB | $20 | ✅ Комфортно (много юзеров) |
-| large | 2.0 | 4GB | $40 | ⚠️ Избыточно |
+| Size | vCPU | RAM | Price/month | Recommendation |
+|------|------|-----|-------------|----------------|
+| micro | 0.25 | 512MB | $7 | Too small (OOM) |
+| **small** | 0.5 | **1GB** | **$10** | **Optimal** |
+| medium | 1.0 | 2GB | $20 | Comfortable (many users) |
+| large | 2.0 | 4GB | $40 | Excessive |
 
-**Footprint:** ~250-330MB RAM → влезает в small с запасом.
+**Footprint:** ~250-330MB RAM - fits in small with room.
 
-## 📊 Архитектура
+## Architecture
 
 ### Producer-Consumer Pattern
 
 ```
 OrderMonitor (Producer)
-    ↓ (обнаружил новый заказ)
+    ↓ (detected new order)
 asyncio.Queue
     ↓ (FIFO)
 OrderProcessor (Consumer)
-    ↓ (попытка взять заказ)
+    ↓ (attempt to grab)
 API: POST /orders/{slug}/take
     ↓
 Callbacks (on_taken / on_failed)
 ```
 
-### Ключевые паттерны
+### Key Patterns
 
-- **Per-user session isolation** - у каждого пользователя свои credentials и monitoring
-- **Adaptive polling с jitter** - защита от детекта бота
-- **Credential auto-refresh** - токены обновляются за ~1 час до истечения
-- **WAF bypass** - CloudFront обход через curl_cffi с Chrome impersonation
-- **Callback-based notifications** - чистое разделение слоёв
+- **Per-user session isolation** - each user has own credentials and monitoring
+- **Adaptive polling with jitter** - protection from bot detection
+- **Credential auto-refresh** - tokens refresh ~1 hour before expiration
+- **WAF bypass** - CloudFront bypass via curl_cffi with Chrome impersonation
+- **Callback-based notifications** - clean layer separation
 
-### Структура проекта
+### Project Structure
 
 ```
 c2c-order-grabber/
-├── main.py              # Точка входа
-├── app.py               # Главный класс приложения
-├── config.py            # Конфигурация
-├── cognito_auth.py      # AWS Cognito авторизация
-├── api_client.py        # Cards2Cards API клиент
+├── main.py              # Entry point
+├── app.py               # Main application class
+├── config.py            # Configuration
+├── cognito_auth.py      # AWS Cognito authentication
+├── api_client.py        # Cards2Cards API client
 ├── aws_signer.py        # AWS Signature V4
-├── user_session.py      # Управление сессиями пользователей
-├── monitor.py           # Мониторинг заказов
-├── processor.py         # Обработка заказов
-├── metrics.py           # Prometheus метрики
-├── bot/                 # Telegram бот
-│   ├── handlers/        # Обработчики команд
-│   │   ├── auth.py      # Авторизация
-│   │   ├── control.py   # Управление (start/stop)
-│   │   ├── settings.py  # Настройки фильтров
-│   │   └── main_menu.py # Главное меню
-│   └── keyboards.py     # Клавиатуры
-├── db/                  # База данных
+├── user_session.py      # User session management
+├── monitor.py           # Order monitoring
+├── processor.py         # Order processing
+├── metrics.py           # Prometheus metrics
+├── bot/                 # Telegram bot
+│   ├── handlers/        # Command handlers
+│   │   ├── auth.py      # Authentication
+│   │   ├── control.py   # Control (start/stop)
+│   │   ├── settings.py  # Filter settings
+│   │   └── main_menu.py # Main menu
+│   └── keyboards.py     # Keyboards
+├── db/                  # Database
 │   ├── engine.py        # SQLAlchemy engine
-│   ├── models.py        # Модели данных
-│   └── repository.py    # Репозитории
-├── deploy/              # Деплой
+│   ├── models.py        # Data models
+│   └── repository.py    # Repositories
+├── deploy/              # Deployment
 │   └── terraform/       # Infrastructure as Code
-├── benchmark/           # RTT тестирование
-│   ├── measure_rtt.py   # Измерение латентности
-│   └── deploy_benchmark.sh # Multi-region деплой
-├── monitoring/          # Конфигурация мониторинга
+├── benchmark/           # RTT testing
+│   ├── measure_rtt.py   # Latency measurement
+│   └── deploy_benchmark.sh # Multi-region deployment
+├── monitoring/          # Monitoring configuration
 │   ├── prometheus.yml
 │   └── grafana/
 │       ├── provisioning/
 │       └── dashboards/
-├── Dockerfile           # Development образ
+├── Dockerfile           # Development image
 ├── Dockerfile.production # Production all-in-one
-├── docker-compose.yml   # Локальный стек
-└── requirements.txt     # Зависимости
+├── docker-compose.yml   # Local stack
+└── requirements.txt     # Dependencies
 ```
 
-## 🔬 Benchmark инструменты
+## Benchmark Tools
 
-### Измерение RTT из разных AWS регионов
+### RTT Measurement from Different AWS Regions
 
-Используется для выбора оптимального региона деплоя:
+Used to select optimal deployment region:
 
 ```bash
 cd benchmark
 ./deploy_benchmark.sh
 ```
 
-Автоматически:
-1. Деплоит контейнеры в 7 AWS регионов
-2. Измеряет DNS, TCP, TLS, HTTP латентность
-3. Генерирует сравнительную таблицу
-4. Рекомендует лучший регион
+Automatically:
+1. Deploys containers to 7 AWS regions
+2. Measures DNS, TCP, TLS, HTTP latency
+3. Generates comparison table
+4. Recommends best region
 
-**Пример вывода:**
+**Example output:**
 ```
 Region                RTT (ms)   TCP (ms)   TLS (ms)  HTTP (ms)
 --------------------------------------------------------------
-us-east-1                4.2ms      4.3ms      9.1ms     15.7ms  ← BEST
+us-east-1                4.2ms      4.3ms      9.1ms     15.7ms  <- BEST
 eu-west-1               92.3ms     93.7ms    185.1ms    241.8ms
 eu-north-1             118.4ms    119.1ms    234.7ms    298.2ms
 ```
 
-## 🛡️ Безопасность
+## Security
 
-- Никогда не коммитить `.env` файл в git
-- Использовать сильные invite codes
-- Надёжно хранить приватные ключи
-- Регулярно обновлять зависимости
-- Сменить дефолтный пароль Grafana (`admin`)
+- Never commit `.env` file to git
+- Use strong invite codes
+- Securely store private keys
+- Regularly update dependencies
+- Change default Grafana password (`admin`)
 
-## 🔧 Технологии
+## Technologies
 
 ### Runtime & Frameworks
 - [Python 3.11](https://www.python.org/) - Runtime
 - [aiogram 3.7+](https://github.com/aiogram/aiogram) - Telegram Bot Framework (async)
-- [aiohttp 3.9+](https://github.com/aio-libs/aiohttp) - Async HTTP клиент
+- [aiohttp 3.9+](https://github.com/aio-libs/aiohttp) - Async HTTP client
 
 ### Database & ORM
 - [SQLAlchemy 2.0+](https://www.sqlalchemy.org/) - Async ORM
-- [aiosqlite](https://github.com/omnilib/aiosqlite) - Async SQLite драйвер
-- SQLite - Локальная БД
+- [aiosqlite](https://github.com/omnilib/aiosqlite) - Async SQLite driver
+- SQLite - Local database
 
 ### AWS Integration
 - [AWS Cognito](https://aws.amazon.com/cognito/) - User Pool + Identity Pool
@@ -374,22 +374,22 @@ eu-north-1             118.4ms    119.1ms    234.7ms    298.2ms
 - [curl_cffi](https://github.com/yifeikong/curl_cffi) - CloudFront WAF bypass (Chrome impersonation)
 
 ### Monitoring & Observability
-- [Prometheus](https://prometheus.io/) - Метрики и мониторинг
-- [Grafana](https://grafana.com/) - Визуализация и дашборды
+- [Prometheus](https://prometheus.io/) - Metrics and monitoring
+- [Grafana](https://grafana.com/) - Visualization and dashboards
 - [prometheus-client](https://github.com/prometheus/client_python) - Python metrics exporter
 
 ### Infrastructure
 - [AWS Lightsail Container Service](https://aws.amazon.com/lightsail/) - Production hosting
 - [Terraform](https://www.terraform.io/) - Infrastructure as Code
 - [GitHub Actions](https://github.com/features/actions) - CI/CD
-- [Docker](https://www.docker.com/) - Контейнеризация
+- [Docker](https://www.docker.com/) - Containerization
 - [supervisord](http://supervisord.org/) - Process manager (production)
 
-## 📄 Лицензия
+## License
 
 Private project
 
-## 👥 Авторы
+## Authors
 
-- Оригинальный проект: [@Ps1nu5](https://github.com/Ps1nu5)
-- Fork и улучшения: [@DASHULYA1337](https://github.com/DASHULYA1337)
+- Original project: [@Ps1nu5](https://github.com/Ps1nu5)
+- Fork and improvements: [@DASHULYA1337](https://github.com/DASHULYA1337)

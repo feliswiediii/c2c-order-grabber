@@ -100,7 +100,7 @@ echo
 log_info "Building Docker image..."
 cd "$(dirname "$0")"
 
-if ! docker build -t "${DOCKER_IMAGE}:${DOCKER_TAG}" .; then
+if ! docker buildx build --platform linux/amd64 -t "${DOCKER_IMAGE}:${DOCKER_TAG}" .; then
     log_error "Docker build failed"
     exit 1
 fi
@@ -163,8 +163,8 @@ for REGION in "${REGIONS[@]}"; do
             --query 'containerServices[0].state' \
             --output text 2>/dev/null || echo "PENDING")
 
-        if [ "$STATE" == "ACTIVE" ]; then
-            log_success "Service is ACTIVE"
+        if [ "$STATE" == "READY" ]; then
+            log_success "Service is READY"
             break
         fi
 
