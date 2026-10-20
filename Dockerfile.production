@@ -65,8 +65,10 @@ RUN mkdir -p /app/data \
     /var/lib/prometheus \
     /var/lib/grafana \
     /var/log/supervisor \
+    /var/run/supervisor \
     /etc/grafana/provisioning/datasources \
-    /etc/grafana/provisioning/dashboards
+    /etc/grafana/provisioning/dashboards && \
+    chmod 755 /var/run/supervisor
 
 # Copy monitoring configs
 COPY monitoring/prometheus.yml /etc/prometheus/prometheus.yml
@@ -102,7 +104,7 @@ allow_sign_up = false\n\
 RUN echo '[supervisord]\n\
 nodaemon=true\n\
 logfile=/var/log/supervisor/supervisord.log\n\
-pidfile=/var/run/supervisord.pid\n\
+pidfile=/var/run/supervisor/supervisord.pid\n\
 \n\
 [program:bot]\n\
 command=python main.py\n\
@@ -141,7 +143,7 @@ priority=3\n\
 
 # Create non-root user and set permissions
 RUN useradd -m -u 1000 appuser && \
-    chown -R appuser:appuser /app /var/lib/prometheus /var/lib/grafana /var/log/supervisor
+    chown -R appuser:appuser /app /var/lib/prometheus /var/lib/grafana /var/log/supervisor /var/run/supervisor
 
 USER appuser
 
