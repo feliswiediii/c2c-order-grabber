@@ -11,11 +11,11 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 
-import config
-from api_client import ApiError
-from db.engine import get_session, init_db
-from db.repository import OrderLogRepository, SettingsRepository, SubscriberRepository
-from user_session import UserSession
+from src import config
+from src.api_client import ApiError
+from src.db.engine import get_session, init_db
+from src.db.repository import OrderLogRepository, SettingsRepository, SubscriberRepository
+from src.user_session import UserSession
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ class App:
         )
         self._dp = Dispatcher(storage=MemoryStorage())
 
-        from bot.handlers import auth, control, main_menu, settings as settings_h
+        from src.bot.handlers import auth, control, main_menu, settings as settings_h
         self._dp.include_router(auth.router)
         self._dp.include_router(main_menu.router)
         self._dp.include_router(settings_h.router)

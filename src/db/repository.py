@@ -4,7 +4,7 @@ from typing import List, Optional
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.models import AuthorizedUser, OrderLog, Settings, Subscriber
+from src.db.models import AuthorizedUser, OrderLog, Settings, Subscriber
 
 
 class SettingsRepository:

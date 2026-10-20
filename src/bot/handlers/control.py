@@ -2,8 +2,8 @@ from aiogram import F, Router
 from aiogram.types import CallbackQuery
 
 from bot.keyboards import main_menu_keyboard
-from db.engine import get_session
-from db.repository import OrderLogRepository
+from src.db.engine import get_session
+from src.db.repository import OrderLogRepository
 
 router = Router()
 

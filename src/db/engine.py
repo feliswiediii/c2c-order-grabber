@@ -6,7 +6,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from config import DATABASE_URL
-from db.models import Base
+from src.db.models import Base
 
 os.makedirs("data", exist_ok=True)
 

@@ -7,9 +7,9 @@ import time
 from datetime import datetime, timedelta, timezone
 from typing import Awaitable, Callable, Optional, Set
 
-from api_client import ApiClient, ApiError
-from cognito_auth import CognitoHttpError
-from config import LOOKBACK_MINUTES, MIN_POLL_INTERVAL_S, MAX_POLL_INTERVAL_S
+from src.api_client import ApiClient, ApiError
+from src.cognito_auth import CognitoHttpError
+from src.config import LOOKBACK_MINUTES, MIN_POLL_INTERVAL_S, MAX_POLL_INTERVAL_S
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +69,7 @@ class OrderMonitor:
 
                 # Record metrics
                 try:
-                    import metrics
+                    from src import metrics
                     metrics.poll_duration_seconds.labels(chat_id=str(self._chat_id)).observe(latency)
                     metrics.record_poll_cycle(self._chat_id, "success")
                     metrics.update_poll_interval(self._chat_id, self.poll_interval)
@@ -124,7 +124,7 @@ class OrderMonitor:
 
                 # Record error metrics
                 try:
-                    import metrics
+                    from src import metrics
                     metrics.record_poll_cycle(self._chat_id, "error")
                 except (ImportError, AttributeError):
                     pass
@@ -132,7 +132,7 @@ class OrderMonitor:
                 if exc.status == 429:
                     # Record rate limit hit
                     try:
-                        import metrics
+                        from src import metrics
                         metrics.record_rate_limit(self._chat_id)
                     except (ImportError, AttributeError):
                         pass
@@ -255,7 +255,7 @@ class OrderMonitor:
 
             # Record order seen metric
             try:
-                import metrics
+                from src import metrics
                 metrics.record_order_seen(self._chat_id)
             except (ImportError, AttributeError):
                 pass

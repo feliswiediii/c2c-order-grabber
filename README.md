@@ -284,43 +284,6 @@ c2c-order-grabber/
 ├── monitor.py           # Order monitoring
 ├── processor.py         # Order processing
 ├── metrics.py           # Prometheus metrics
-├── bot/                 # Telegram bot
-│   ├── handlers/        # Command handlers
-│   │   ├── auth.py      # Authentication
-│   │   ├── control.py   # Control (start/stop)
-│   │   ├── settings.py  # Filter settings
-│   │   └── main_menu.py # Main menu
-│   └── keyboards.py     # Keyboards
-├── db/                  # Database
-│   ├── engine.py        # SQLAlchemy engine
-│   ├── models.py        # Data models
-│   └── repository.py    # Repositories
-├── deploy/              # Deployment
-│   └── terraform/       # Infrastructure as Code
-├── benchmark/           # RTT testing
-│   ├── measure_rtt.py   # Latency measurement
-│   └── deploy_benchmark.sh # Multi-region deployment
-├── monitoring/          # Monitoring configuration
-│   ├── prometheus.yml
-│   └── grafana/
-│       ├── provisioning/
-│       └── dashboards/
-├── Dockerfile           # Development image
-├── Dockerfile.production # Production all-in-one
-├── docker-compose.yml   # Local stack
-└── requirements.txt     # Dependencies
-```
-
-## Security
-
-- Never commit `.env` file to git
-- Use strong invite codes
-- Securely store private keys
-- Regularly update dependencies
-- Change default Grafana password (`admin`)
-
-## Technologies
-
 ### Runtime & Frameworks
 - [Python 3.11](https://www.python.org/) - Runtime
 - [aiogram 3.7+](https://github.com/aiogram/aiogram) - Telegram Bot Framework (async)
@@ -356,3 +319,52 @@ Private project
 
 - Original project: [@Ps1nu5](https://github.com/Ps1nu5)
 - Fork and improvements: [@DASHULYA1337](https://github.com/DASHULYA1337)
+```
+c2c-order-grabber/
+├── main.py              # Entry point
+├── src/                 # Source code
+│   ├── app.py           # Main application class
+│   ├── config.py        # Configuration
+│   ├── cognito_auth.py  # AWS Cognito authentication
+│   ├── api_client.py    # Cards2Cards API client
+│   ├── aws_signer.py    # AWS Signature V4
+│   ├── user_session.py  # User session management
+│   ├── monitor.py       # Order monitoring
+│   ├── processor.py     # Order processing
+│   ├── metrics.py       # Prometheus metrics
+│   ├── bot/             # Telegram bot
+│   │   ├── handlers/    # Command handlers
+│   │   │   ├── auth.py      # Authentication
+│   │   │   ├── control.py   # Control (start/stop)
+│   │   │   ├── settings.py  # Filter settings
+│   │   │   └── main_menu.py # Main menu
+│   │   └── keyboards.py     # Keyboards
+│   └── db/              # Database
+│       ├── engine.py    # SQLAlchemy engine
+│       ├── models.py    # Data models
+│       └── repository.py # Repositories
+├── deploy/              # Deployment
+│   └── terraform/       # Infrastructure as Code
+├── benchmark/           # RTT testing
+│   ├── Dockerfile       # Benchmark container
+│   ├── measure_rtt.py   # Latency measurement
+│   └── deploy_benchmark.sh # Multi-region deployment
+├── monitoring/          # Monitoring configuration
+│   ├── prometheus.yml
+│   └── grafana/
+│       ├── provisioning/
+│       └── dashboards/
+├── Dockerfile           # Development image
+├── Dockerfile.production # Production all-in-one
+├── docker-compose.yml   # Local stack
+└── requirements.txt     # Dependencies
+```
+
+## Security
+
+- Never commit `.env` file to git
+- Use strong invite codes
+- Securely store private keys
+- Regularly update dependencies
+- Change default Grafana password (`admin`)
+

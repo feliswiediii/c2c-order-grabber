@@ -9,8 +9,8 @@ from bot.keyboards import (
     main_menu_keyboard,
     settings_menu_keyboard,
 )
-from db.engine import get_session
-from db.repository import SettingsRepository
+from src.db.engine import get_session
+from src.db.repository import SettingsRepository
 
 router = Router()
 

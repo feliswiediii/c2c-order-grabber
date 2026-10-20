@@ -7,12 +7,12 @@ import time
 
 from aiohttp import web
 
-from app import App
+from src.app import App
 
 
 def setup_logging() -> None:
     import os
-    import config
+    from src import config
 
     # Check if DEBUG mode is enabled via environment variable
     debug_mode = os.getenv("DEBUG", "").lower() in ("1", "true", "yes")
@@ -96,7 +96,7 @@ async def main() -> None:
 
     # Start Prometheus metrics server
     try:
-        import metrics
+        from src import metrics
         metrics.start_metrics_server(port=9090)
     except Exception as e:
         logging.warning(f"Failed to start metrics server: {e}")

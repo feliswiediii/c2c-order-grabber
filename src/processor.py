@@ -5,7 +5,7 @@ import logging
 import time
 from typing import Awaitable, Callable, Optional
 
-from api_client import ApiClient, ApiError
+from src.api_client import ApiClient, ApiError
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ class OrderProcessor:
 
                 # Update queue depth metric
                 try:
-                    import metrics
+                    from src import metrics
                     metrics.update_queue_depth(self._chat_id, self._queue.qsize())
                 except (ImportError, AttributeError):
                     pass
@@ -77,7 +77,7 @@ class OrderProcessor:
 
             # Record metrics for successful grab
             try:
-                import metrics
+                from src import metrics
                 grab_duration = time.time() - start_time
                 metrics.record_order_taken(self._chat_id)
                 metrics.order_grab_duration_seconds.labels(
@@ -99,7 +99,7 @@ class OrderProcessor:
 
             # Record metrics for failed grab
             try:
-                import metrics
+                from src import metrics
                 metrics.order_grab_duration_seconds.labels(
                     chat_id=str(self._chat_id),
                     result="failure"
@@ -112,7 +112,7 @@ class OrderProcessor:
                 logger.info("Order %s already taken by another trader (HTTP %d)", slug, exc.status)
 
                 try:
-                    import metrics
+                    from src import metrics
                     metrics.record_order_failed(self._chat_id, "race_condition")
                 except (ImportError, AttributeError):
                     pass
@@ -123,7 +123,7 @@ class OrderProcessor:
                 logger.error("Auth error taking order %s — check API credentials", slug)
 
                 try:
-                    import metrics
+                    from src import metrics
                     metrics.record_order_failed(self._chat_id, "auth_error")
                 except (ImportError, AttributeError):
                     pass
@@ -144,7 +144,7 @@ class OrderProcessor:
                 logger.error("API error taking order %s: %s", slug, exc)
 
                 try:
-                    import metrics
+                    from src import metrics
                     metrics.record_order_failed(self._chat_id, error_reason)
                 except (ImportError, AttributeError):
                     pass
@@ -156,7 +156,7 @@ class OrderProcessor:
             logger.error("Error taking order %s: %s", slug, exc)
 
             try:
-                import metrics
+                from src import metrics
                 metrics.order_grab_duration_seconds.labels(
                     chat_id=str(self._chat_id),
                     result="failure"

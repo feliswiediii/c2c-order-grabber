@@ -11,9 +11,9 @@ from typing import Any, Awaitable, Callable, Optional
 
 import aiohttp
 
-from aws_signer import sign_request
-from cognito_auth import AwsCredentials
-from config import API_BASE_URL, MAX_RETRIES, REQUEST_TIMEOUT_S
+from src.aws_signer import sign_request
+from src.cognito_auth import AwsCredentials
+from src.config import API_BASE_URL, MAX_RETRIES, REQUEST_TIMEOUT_S
 
 logger = logging.getLogger(__name__)
 
