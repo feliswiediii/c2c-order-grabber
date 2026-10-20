@@ -9,8 +9,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
-from bot.keyboards import cancel_keyboard
-from cognito_auth import MfaRequiredException
+from src.bot.keyboards import cancel_keyboard
+from src.cognito_auth import MfaRequiredException
 
 if TYPE_CHECKING:
     from app import App
@@ -247,7 +247,7 @@ async def auth_logout(callback: CallbackQuery, state: FSMContext, app: App) -> N
     await app.remove_session(chat_id)
     await state.clear()
 
-    from bot.keyboards import main_menu_keyboard
+    from src.bot.keyboards import main_menu_keyboard
     await callback.message.edit_text(
         "🚪 Вы вышли из системы.\n\nДля повторной авторизации нажмите кнопку ниже.",
         reply_markup=main_menu_keyboard(is_running=False, is_authenticated=False),
@@ -302,7 +302,7 @@ async def invite_code_check(message: Message, state: FSMContext, app: App) -> No
             await auth_repo.authorize(chat_id)
 
         await state.clear()
-        from bot.keyboards import main_menu_keyboard
+        from src.bot.keyboards import main_menu_keyboard
         await message.answer(
             "✅ <b>Код принят!</b>\n\n"
             "Добро пожаловать! Теперь вы можете использовать бота.\n"

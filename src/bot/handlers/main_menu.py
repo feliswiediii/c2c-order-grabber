@@ -2,7 +2,7 @@ from aiogram import Router
 from aiogram.filters import CommandStart
 from aiogram.types import CallbackQuery, Message
 
-from bot.keyboards import main_menu_keyboard
+from src.bot.keyboards import main_menu_keyboard
 from src.db.engine import get_session
 from src.db.repository import SettingsRepository
 
