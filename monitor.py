@@ -23,6 +23,7 @@ class OrderMonitor:
         client:        ApiClient,
         queue:         asyncio.Queue,
         trader_id:     str,
+        chat_id:       int,  # For metrics tracking
         on_startup_ok: Optional[OnStartupCallback] = None,
         on_error:      Optional[OnErrorCallback]   = None,
         min_amount:    Optional[float]             = None,
@@ -32,6 +33,7 @@ class OrderMonitor:
         self._client        = client
         self._queue         = queue
         self._trader_id     = trader_id
+        self._chat_id       = chat_id
         self._on_startup    = on_startup_ok
         self._on_error      = on_error
         self.min_amount     = min_amount
@@ -64,6 +66,15 @@ class OrderMonitor:
                     main.update_health_check_activity()
                 except (ImportError, AttributeError):
                     pass  # Health check not available
+
+                # Record metrics
+                try:
+                    import metrics
+                    metrics.poll_duration_seconds.labels(chat_id=str(self._chat_id)).observe(latency)
+                    metrics.record_poll_cycle(self._chat_id, "success")
+                    metrics.update_poll_interval(self._chat_id, self.poll_interval)
+                except (ImportError, AttributeError):
+                    pass  # Metrics not available
 
                 # Track latency
                 self._latencies.append(latency)
@@ -110,7 +121,21 @@ class OrderMonitor:
                     continue
             except ApiError as exc:
                 latency = time.monotonic() - start
+
+                # Record error metrics
+                try:
+                    import metrics
+                    metrics.record_poll_cycle(self._chat_id, "error")
+                except (ImportError, AttributeError):
+                    pass
+
                 if exc.status == 429:
+                    # Record rate limit hit
+                    try:
+                        import metrics
+                        metrics.record_rate_limit(self._chat_id)
+                    except (ImportError, AttributeError):
+                        pass
                     logger.error(
                         "Poll error after %.1fms: HTTP 429 Too Many Requests: %s",
                         latency * 1000, exc.body
@@ -227,7 +252,15 @@ class OrderMonitor:
 
             self._seen.add(slug)
             logger.info("NEW order found: %s amount=%.2f RUB", slug, amount or 0.0)
-            await self._queue.put({"slug": slug, "amount": amount, "raw": order})
+
+            # Record order seen metric
+            try:
+                import metrics
+                metrics.record_order_seen(self._chat_id)
+            except (ImportError, AttributeError):
+                pass
+
+            await self._queue.put({"slug": slug, "amount": amount, "raw": order, "detected_at": time.time()})
             enqueued += 1
 
         # Log summary after each poll (in DEBUG mode)

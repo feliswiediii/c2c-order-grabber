@@ -96,6 +96,7 @@ class UserSession:
             client        = self.api_client,
             queue         = self._queue,
             trader_id     = self.trader_id,
+            chat_id       = self.chat_id,  # For metrics tracking
             on_startup_ok = on_startup_ok,
             on_error      = on_error,
             min_amount    = self.min_amount,
@@ -107,6 +108,7 @@ class UserSession:
             client    = self.api_client,
             queue     = self._queue,
             trader_id = self.trader_id,
+            chat_id   = self.chat_id,  # For metrics tracking
             on_taken  = on_taken,
             on_failed = on_failed,
         )
