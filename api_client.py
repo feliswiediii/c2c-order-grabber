@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json as _json
 import logging
+import time
 import urllib.parse
 from datetime import datetime, timezone
 from typing import Any, Awaitable, Callable, Optional
@@ -60,6 +62,7 @@ class ApiClient:
         path:   str,
         query:  str = "",
         body:   Optional[dict] = None,
+        extra_headers: Optional[dict[str, str]] = None,
     ) -> Any:
         url = f"{API_BASE_URL}{path}"
         if query:
@@ -84,6 +87,10 @@ class ApiClient:
                 region            = self._aws_region,
             )
             headers["Accept"] = "application/json"
+
+            # Add extra headers (e.g., Idempotency-Key)
+            if extra_headers:
+                headers.update(extra_headers)
 
             try:
                 async with self._session.request(
@@ -153,8 +160,23 @@ class ApiClient:
         return []
 
     async def take_order(self, order_slug: str, trader_id: str) -> dict:
-        path   = f"/v2/dashboard/trader/orders/{order_slug}/take"
-        result = await self._request("POST", path, body={"traderId": trader_id})
+        path = f"/v2/dashboard/trader/orders/{order_slug}/take"
+
+        # Generate idempotency key: deterministic based on trader_id + order_slug + timestamp bucket
+        # Using 10-second buckets to allow retries within same time window
+        timestamp_bucket = int(time.time() / 10) * 10
+        idempotency_data = f"{trader_id}:{order_slug}:{timestamp_bucket}"
+        idempotency_key = hashlib.sha256(idempotency_data.encode()).hexdigest()[:32]
+
+        extra_headers = {
+            "Idempotency-Key": idempotency_key,
+        }
+
+        result = await self._request(
+            "POST", path,
+            body={"traderId": trader_id},
+            extra_headers=extra_headers
+        )
         if isinstance(result, dict):
             return result.get("data") or {}
         return {}
