@@ -110,6 +110,14 @@ class App:
         )
         self._user_sessions[chat_id] = session
         logger.info("Created session for chat_id=%s", chat_id)
+
+        # Update active sessions metric
+        try:
+            import metrics
+            metrics.update_active_sessions(len(self._user_sessions))
+        except (ImportError, AttributeError):
+            pass
+
         return session
 
     async def remove_session(self, chat_id: int) -> None:
@@ -120,12 +128,26 @@ class App:
             del self._user_sessions[chat_id]
             logger.info("Removed session for chat_id=%s", chat_id)
 
+            # Update active sessions metric
+            try:
+                import metrics
+                metrics.update_active_sessions(len(self._user_sessions))
+            except (ImportError, AttributeError):
+                pass
+
     async def stop_all_sessions(self) -> None:
         """Stop all user sessions."""
         for session in list(self._user_sessions.values()):
             await session.stop_monitoring()
         self._user_sessions.clear()
         logger.info("All sessions stopped")
+
+        # Update active sessions metric
+        try:
+            import metrics
+            metrics.update_active_sessions(0)
+        except (ImportError, AttributeError):
+            pass
 
     async def _on_taken(self, chat_id: int, slug: str, amount: Optional[float], error_reason: Optional[str]) -> None:
         """Callback when order is taken for a specific user."""

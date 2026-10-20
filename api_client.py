@@ -98,6 +98,14 @@ class ApiClient:
                 ) as resp:
                     payload = await resp.json(content_type=None)
 
+                    # Record API request metrics
+                    try:
+                        import metrics
+                        status_class = f"{resp.status // 100}xx"
+                        metrics.record_api_request(path, method, status_class)
+                    except (ImportError, AttributeError):
+                        pass
+
                     if resp.status == 200:
                         return payload
 
@@ -128,6 +136,13 @@ class ApiClient:
             except (aiohttp.ClientError, asyncio.TimeoutError) as exc:
                 last_exc = exc
                 logger.warning("Network error (attempt %d/%d): %s", attempt + 1, MAX_RETRIES, exc)
+
+                # Record network error metric
+                try:
+                    import metrics
+                    metrics.record_api_request(path, method, "error")
+                except (ImportError, AttributeError):
+                    pass
                 if attempt < MAX_RETRIES - 1:
                     await asyncio.sleep(0.3 * (attempt + 1))
 
