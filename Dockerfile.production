@@ -111,8 +111,10 @@ command=python main.py\n\
 directory=/app\n\
 autostart=true\n\
 autorestart=true\n\
-stderr_logfile=/var/log/supervisor/bot.err.log\n\
-stdout_logfile=/var/log/supervisor/bot.out.log\n\
+stderr_logfile=/dev/stderr\n\
+stderr_logfile_maxbytes=0\n\
+stdout_logfile=/dev/stdout\n\
+stdout_logfile_maxbytes=0\n\
 priority=1\n\
 \n\
 [program:prometheus]\n\
@@ -125,8 +127,10 @@ command=/opt/prometheus/prometheus \
   --web.console.templates=/opt/prometheus/consoles\n\
 autostart=true\n\
 autorestart=true\n\
-stderr_logfile=/var/log/supervisor/prometheus.err.log\n\
-stdout_logfile=/var/log/supervisor/prometheus.out.log\n\
+stderr_logfile=/dev/stderr\n\
+stderr_logfile_maxbytes=0\n\
+stdout_logfile=/dev/stdout\n\
+stdout_logfile_maxbytes=0\n\
 priority=2\n\
 \n\
 [program:grafana]\n\
@@ -136,8 +140,10 @@ command=/opt/grafana/bin/grafana-server \
 directory=/opt/grafana\n\
 autostart=true\n\
 autorestart=true\n\
-stderr_logfile=/var/log/supervisor/grafana.err.log\n\
-stdout_logfile=/var/log/supervisor/grafana.out.log\n\
+stderr_logfile=/dev/stderr\n\
+stderr_logfile_maxbytes=0\n\
+stdout_logfile=/dev/stdout\n\
+stdout_logfile_maxbytes=0\n\
 priority=3\n\
 ' > /etc/supervisor/conf.d/supervisord.conf
 
