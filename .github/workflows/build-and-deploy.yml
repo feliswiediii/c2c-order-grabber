@@ -112,8 +112,8 @@ jobs:
             "containerPort": 3000,
             "healthCheck": {
               "healthyThreshold": 2,
-              "unhealthyThreshold": 2,
-              "timeoutSeconds": 5,
+              "unhealthyThreshold": 3,
+              "timeoutSeconds": 10,
               "intervalSeconds": 30,
               "path": "/",
               "successCodes": "200-399"
