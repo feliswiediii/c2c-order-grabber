@@ -1,0 +1,156 @@
+# Production Dockerfile with Bot + Prometheus + Grafana
+# All services run in a single container via supervisord
+#
+# Services:
+# - Bot (Python app) on ports 8080 (health), 9090 (metrics)
+# - Prometheus on port 9091 (scrapes bot:9090)
+# - Grafana on port 3000 (visualizes metrics)
+#
+# Estimated RAM: ~250-300MB
+# Recommended: Lightsail small (1GB RAM, $10/month)
+
+FROM python:3.11-slim AS builder
+
+WORKDIR /build
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Build Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+# Download Prometheus
+RUN wget -q https://github.com/prometheus/prometheus/releases/download/v2.48.0/prometheus-2.48.0.linux-amd64.tar.gz && \
+    tar xzf prometheus-2.48.0.linux-amd64.tar.gz && \
+    mv prometheus-2.48.0.linux-amd64 /prometheus-dist && \
+    rm prometheus-2.48.0.linux-amd64.tar.gz
+
+# Download Grafana
+RUN wget -q https://dl.grafana.com/oss/release/grafana-10.2.2.linux-amd64.tar.gz && \
+    tar xzf grafana-10.2.2.linux-amd64.tar.gz && \
+    mv grafana-v10.2.2 /grafana-dist && \
+    rm grafana-10.2.2.linux-amd64.tar.gz
+
+# Production stage
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    supervisor \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy Python dependencies
+COPY --from=builder /install /usr/local
+
+# Copy Prometheus
+COPY --from=builder /prometheus-dist /opt/prometheus
+
+# Copy Grafana
+COPY --from=builder /grafana-dist /opt/grafana
+
+# Copy application code
+COPY . .
+
+# Create necessary directories
+RUN mkdir -p /app/data \
+    /var/lib/prometheus \
+    /var/lib/grafana \
+    /var/log/supervisor \
+    /etc/grafana/provisioning/datasources \
+    /etc/grafana/provisioning/dashboards
+
+# Copy monitoring configs
+COPY monitoring/prometheus.yml /etc/prometheus/prometheus.yml
+COPY monitoring/grafana/provisioning/datasources/prometheus.yml /etc/grafana/provisioning/datasources/
+COPY monitoring/grafana/provisioning/dashboards/default.yml /etc/grafana/provisioning/dashboards/
+COPY monitoring/grafana/dashboards/c2c-bot-dashboard.json /var/lib/grafana/dashboards/
+
+# Update Grafana datasource to point to localhost
+RUN sed -i 's|http://prometheus:9090|http://localhost:9091|g' /etc/grafana/provisioning/datasources/prometheus.yml
+
+# Update Prometheus config to scrape localhost
+RUN sed -i "s|bot:9090|localhost:9090|g" /etc/prometheus/prometheus.yml
+
+# Create Grafana config
+RUN echo '[paths]\n\
+data = /var/lib/grafana\n\
+logs = /var/log/grafana\n\
+plugins = /var/lib/grafana/plugins\n\
+provisioning = /etc/grafana/provisioning\n\
+\n\
+[server]\n\
+http_port = 3000\n\
+\n\
+[security]\n\
+admin_user = admin\n\
+admin_password = admin\n\
+\n\
+[users]\n\
+allow_sign_up = false\n\
+' > /etc/grafana/grafana.ini
+
+# Create supervisor config
+RUN echo '[supervisord]\n\
+nodaemon=true\n\
+logfile=/var/log/supervisor/supervisord.log\n\
+pidfile=/var/run/supervisord.pid\n\
+\n\
+[program:bot]\n\
+command=python main.py\n\
+directory=/app\n\
+autostart=true\n\
+autorestart=true\n\
+stderr_logfile=/var/log/supervisor/bot.err.log\n\
+stdout_logfile=/var/log/supervisor/bot.out.log\n\
+priority=1\n\
+\n\
+[program:prometheus]\n\
+command=/opt/prometheus/prometheus \
+  --config.file=/etc/prometheus/prometheus.yml \
+  --storage.tsdb.path=/var/lib/prometheus \
+  --storage.tsdb.retention.time=7d \
+  --web.listen-address=:9091 \
+  --web.console.libraries=/opt/prometheus/console_libraries \
+  --web.console.templates=/opt/prometheus/consoles\n\
+autostart=true\n\
+autorestart=true\n\
+stderr_logfile=/var/log/supervisor/prometheus.err.log\n\
+stdout_logfile=/var/log/supervisor/prometheus.out.log\n\
+priority=2\n\
+\n\
+[program:grafana]\n\
+command=/opt/grafana/bin/grafana-server \
+  --config=/etc/grafana/grafana.ini \
+  --homepath=/opt/grafana\n\
+directory=/opt/grafana\n\
+autostart=true\n\
+autorestart=true\n\
+stderr_logfile=/var/log/supervisor/grafana.err.log\n\
+stdout_logfile=/var/log/supervisor/grafana.out.log\n\
+priority=3\n\
+' > /etc/supervisor/conf.d/supervisord.conf
+
+# Create non-root user and set permissions
+RUN useradd -m -u 1000 appuser && \
+    chown -R appuser:appuser /app /var/lib/prometheus /var/lib/grafana /var/log/supervisor
+
+USER appuser
+
+# Expose all service ports
+EXPOSE 3000 8080 9090 9091
+
+# Health check for the bot
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+# Start all services via supervisor
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

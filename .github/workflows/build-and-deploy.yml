@@ -50,6 +50,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: Dockerfile.production
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -94,7 +95,28 @@ jobs:
                 "HTTPS_PROXY": "${{ secrets.HTTPS_PROXY }}",
                 "DATABASE_URL": "sqlite+aiosqlite:///./data/bot.db",
                 "LOG_FILE": "bot.log"
+              },
+              "ports": {
+                "3000": "HTTP",
+                "8080": "HTTP",
+                "9090": "HTTP",
+                "9091": "HTTP"
               }
+            }
+          }
+          EOF
+
+          cat > public-endpoint.json << EOF
+          {
+            "containerName": "c2c-bot",
+            "containerPort": 3000,
+            "healthCheck": {
+              "healthyThreshold": 2,
+              "unhealthyThreshold": 2,
+              "timeoutSeconds": 5,
+              "intervalSeconds": 30,
+              "path": "/api/health",
+              "successCodes": "200"
             }
           }
           EOF
@@ -102,6 +124,7 @@ jobs:
           aws lightsail create-container-service-deployment \
             --service-name ${{ env.CONTAINER_SERVICE_NAME }} \
             --containers file://containers.json \
+            --public-endpoint file://public-endpoint.json \
             --region ${{ env.AWS_REGION }}
 
       - name: Wait for deployment
