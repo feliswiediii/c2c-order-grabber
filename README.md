@@ -50,7 +50,7 @@ Telegram bot for automated monitoring and grabbing orders on Cards2Cards platfor
   - All-in-one container (Bot + Prometheus + Grafana)
   - 7 day metrics retention
   - HTTPS access to Grafana from anywhere
-  - ~250-300MB RAM (fits in Lightsail small $10/month)
+  - ~250-300MB RAM
 
 ## Requirements
 
@@ -244,8 +244,6 @@ aws lightsail get-container-services \
 
 Result: `https://c2c-order-grabber.xxxxx.eu-north-1.cs.amazonlightsail.com`
 
-Open in browser, login: `admin` / `admin` - **Change password immediately!**
-
 ## Architecture
 
 ### Producer-Consumer Pattern
@@ -272,53 +270,6 @@ Callbacks (on_taken / on_failed)
 
 ### Project Structure
 
-```
-c2c-order-grabber/
-├── main.py              # Entry point
-├── app.py               # Main application class
-├── config.py            # Configuration
-├── cognito_auth.py      # AWS Cognito authentication
-├── api_client.py        # Cards2Cards API client
-├── aws_signer.py        # AWS Signature V4
-├── user_session.py      # User session management
-├── monitor.py           # Order monitoring
-├── processor.py         # Order processing
-├── metrics.py           # Prometheus metrics
-### Runtime & Frameworks
-- [Python 3.11](https://www.python.org/) - Runtime
-- [aiogram 3.7+](https://github.com/aiogram/aiogram) - Telegram Bot Framework (async)
-- [aiohttp 3.9+](https://github.com/aio-libs/aiohttp) - Async HTTP client
-
-### Database & ORM
-- [SQLAlchemy 2.0+](https://www.sqlalchemy.org/) - Async ORM
-- [aiosqlite](https://github.com/omnilib/aiosqlite) - Async SQLite driver
-- SQLite - Local database
-
-### AWS Integration
-- [AWS Cognito](https://aws.amazon.com/cognito/) - User Pool + Identity Pool
-- [AWS SigV4](https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html) - Request signing
-- [curl_cffi](https://github.com/yifeikong/curl_cffi) - CloudFront WAF bypass (Chrome impersonation)
-
-### Monitoring & Observability
-- [Prometheus](https://prometheus.io/) - Metrics and monitoring
-- [Grafana](https://grafana.com/) - Visualization and dashboards
-- [prometheus-client](https://github.com/prometheus/client_python) - Python metrics exporter
-
-### Infrastructure
-- [AWS Lightsail Container Service](https://aws.amazon.com/lightsail/) - Production hosting
-- [Terraform](https://www.terraform.io/) - Infrastructure as Code
-- [GitHub Actions](https://github.com/features/actions) - CI/CD
-- [Docker](https://www.docker.com/) - Containerization
-- [supervisord](http://supervisord.org/) - Process manager (production)
-
-## License
-
-Private project
-
-## Authors
-
-- Original project: [@Ps1nu5](https://github.com/Ps1nu5)
-- Fork and improvements: [@DASHULYA1337](https://github.com/DASHULYA1337)
 ```
 c2c-order-grabber/
 ├── main.py              # Entry point
@@ -360,6 +311,35 @@ c2c-order-grabber/
 └── requirements.txt     # Dependencies
 ```
 
+## Technologies
+
+### Runtime & Frameworks
+- [Python 3.11](https://www.python.org/) - Runtime
+- [aiogram 3.7+](https://github.com/aiogram/aiogram) - Telegram Bot Framework (async)
+- [aiohttp 3.9+](https://github.com/aio-libs/aiohttp) - Async HTTP client
+
+### Database & ORM
+- [SQLAlchemy 2.0+](https://www.sqlalchemy.org/) - Async ORM
+- [aiosqlite](https://github.com/omnilib/aiosqlite) - Async SQLite driver
+- SQLite - Local database
+
+### AWS Integration
+- [AWS Cognito](https://aws.amazon.com/cognito/) - User Pool + Identity Pool
+- [AWS SigV4](https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html) - Request signing
+- [curl_cffi](https://github.com/yifeikong/curl_cffi) - CloudFront WAF bypass (Chrome impersonation)
+
+### Monitoring & Observability
+- [Prometheus](https://prometheus.io/) - Metrics and monitoring
+- [Grafana](https://grafana.com/) - Visualization and dashboards
+- [prometheus-client](https://github.com/prometheus/client_python) - Python metrics exporter
+
+### Infrastructure
+- [AWS Lightsail Container Service](https://aws.amazon.com/lightsail/) - Production hosting
+- [Terraform](https://www.terraform.io/) - Infrastructure as Code
+- [GitHub Actions](https://github.com/features/actions) - CI/CD
+- [Docker](https://www.docker.com/) - Containerization
+- [supervisord](http://supervisord.org/) - Process manager (production)
+
 ## Security
 
 - Never commit `.env` file to git
@@ -367,4 +347,13 @@ c2c-order-grabber/
 - Securely store private keys
 - Regularly update dependencies
 - Change default Grafana password (`admin`)
+
+## License
+
+Private project
+
+## Authors
+
+- Original project: [@Ps1nu5](https://github.com/Ps1nu5)
+- Fork and improvements: [@DASHULYA1337](https://github.com/DASHULYA1337)
 
